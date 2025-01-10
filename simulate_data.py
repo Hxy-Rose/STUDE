@@ -38,15 +38,17 @@ noise_levels = [7, 25, 50, 100]
 
 # Loop over each noise level and generate data
 for noise_level in noise_levels:
-    # Folder paths for train and test
+    # Folder paths for train, val, and test
     train_folder_path = f'/DATA_Simu/DATA_SD_{noise_level}/train/'
+    val_folder_path = f'/DATA_Simu/DATA_SD_{noise_level}/val/'
     test_folder_path = f'/DATA_Simu/DATA_SD_{noise_level}/test/'
 
     # Create directories if they don't exist
     os.makedirs(train_folder_path, exist_ok=True)
+    os.makedirs(val_folder_path, exist_ok=True)
     os.makedirs(test_folder_path, exist_ok=True)
 
-    # Generate 2000 images for the train folder and 400 images for the test folder
+    # Generate 2000 images for training and validation (80-20 split)
     for noise_idx in range(2000):
         # Define random parameters for the simulation
         Ktrans = np.concatenate(([0], np.random.rand(8) * (Ktrans_range[1] - Ktrans_range[0]) + Ktrans_range[0]))
@@ -82,17 +84,23 @@ for noise_level in noise_levels:
         DCE_test = np.concatenate((DCE_signal_noisy, Ktrans_real[..., np.newaxis], ve_real[..., np.newaxis], vp_real[..., np.newaxis], dt_real[..., np.newaxis]), axis=2)
         DCE_test = np.transpose(DCE_test, (2, 0, 1))
 
-        # Save the generated DCE data as a .nii file in the train folder
+        # Determine whether to save in training or validation folder
+        if noise_idx < 1600:
+            folder_path = train_folder_path  # 80% for training
+        else:
+            folder_path = val_folder_path  # 20% for validation
+
+        # Save the generated DCE data as a .nii file
         filename_base = f'SD_{noise_level}_{noise_idx+1:05d}_Ct_params'
         new_filename = f'{filename_base}.nii'
-        new_filename2 = os.path.join(train_folder_path, new_filename)
+        new_filename2 = os.path.join(folder_path, new_filename)
         img = nib.Nifti1Image(DCE_test, np.eye(4))
         nib.save(img, new_filename2)
 
-        print(f'Saved {noise_idx+1}/2000 in train folder with noise level {noise_level:.2f}')
+        print(f'Saved {noise_idx+1}/2000 in {folder_path} with noise level {noise_level:.2f}')
 
     # Generate 400 images for the test folder
-    for noise_idx in range(2000):  # Index from 2000 to 2399
+    for noise_idx in range(400):  # Index from 2000 to 2399
         # Define random parameters for the simulation (same as above)
         Ktrans = np.concatenate(([0], np.random.rand(8) * (Ktrans_range[1] - Ktrans_range[0]) + Ktrans_range[0]))
         Ve = np.concatenate(([0], np.random.rand(8) * (Ve_range[1] - Ve_range[0]) + Ve_range[0]))
@@ -127,11 +135,11 @@ for noise_level in noise_levels:
         DCE_test = np.concatenate((DCE_signal_noisy, Ktrans_real[..., np.newaxis], ve_real[..., np.newaxis], vp_real[..., np.newaxis], dt_real[..., np.newaxis]), axis=2)
         DCE_test = np.transpose(DCE_test, (2, 0, 1))
 
-        # Save the generated DCE data as a .nii file in the test folder
+        # Save the generated DCE data for test
         filename_base = f'SD_{noise_level}_{noise_idx+1:05d}_Ct_params'
         new_filename = f'{filename_base}.nii'
         new_filename2 = os.path.join(test_folder_path, new_filename)
         img = nib.Nifti1Image(DCE_test, np.eye(4))
         nib.save(img, new_filename2)
 
-        print(f'Saved {noise_idx+1}/400 in test folder with noise level {noise_level:.2f}')
+        print(f'Saved {noise_idx+1}/400 in {test_folder_path} with noise level {noise_level:.2f}')
