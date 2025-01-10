@@ -7,4 +7,5 @@ To create the environment dce in anaconda, the following command can be used:
 > conda env create -f environment.yml
 
 # Generate the numerical brain phantom
-Synthesizing numerical brain data can be done using **simulation_data.py**.
+Synthesizing numerical brain data can be done using **simulate_data.py**.
+> python simulate_data.py
