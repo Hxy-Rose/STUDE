@@ -12,7 +12,7 @@ Synthesizing numerical brain data can be done using **simulate_data.py**.
 > 
 > python simulate_data.py
 
-* Data is organized in a hierarchical folder structure as shown below.
+Data is organized in a hierarchical folder structure as shown below.
 
 ```
 ./data
